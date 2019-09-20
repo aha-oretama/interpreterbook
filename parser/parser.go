@@ -5,6 +5,7 @@ import (
 	"github.com/aha-oretama/interpreterbook/ast"
 	"github.com/aha-oretama/interpreterbook/lexer"
 	"github.com/aha-oretama/interpreterbook/token"
+	"strconv"
 )
 
 const (
@@ -119,6 +120,19 @@ func (p *Parser) parseIdentifier() ast.Expression {
 	}
 }
 
+func (p *Parser) parseIntegerLiteral() ast.Expression {
+	literal := &ast.IntegerLiteral{Token: p.curToken}
+
+	value, err := strconv.ParseInt(p.curToken.Literal, 0, 64)
+	if err != nil {
+		msg := fmt.Sprintf("could not parse %q as integer", p.curToken.Literal)
+		p.errors = append(p.errors, msg)
+		return nil
+	}
+	literal.Value = value
+	return literal
+}
+
 func (p *Parser) execPeek(t token.TokenType) bool {
 	if p.peekTokenIs(t) {
 		p.nextToken()
@@ -154,6 +168,7 @@ func New(l *lexer.Lexer) *Parser {
 
 	p.prefixParseFn = make(map[token.TokenType]prefixParseFn)
 	p.registerPrefix(token.IDENT, p.parseIdentifier)
+	p.registerPrefix(token.INT, p.parseIntegerLiteral)
 
 	p.nextToken() // when called first, curToken is not set
 	p.nextToken()
