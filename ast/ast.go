@@ -70,7 +70,7 @@ type Identifier struct {
 	Value string
 }
 
-func (ls *Identifier) statementNode() {}
+func (ls *Identifier) expressionNode() {}
 func (ls *Identifier) TokenLiteral() string {
 	return ls.Token.Literal
 }
