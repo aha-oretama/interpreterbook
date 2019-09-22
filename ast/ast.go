@@ -65,19 +65,6 @@ func (ls *LetStatement) String() string {
 	return out.String()
 }
 
-type Identifier struct {
-	Token token.Token // token.IDENT
-	Value string
-}
-
-func (ls *Identifier) expressionNode() {}
-func (ls *Identifier) TokenLiteral() string {
-	return ls.Token.Literal
-}
-func (ls *Identifier) String() string {
-	return ls.Value
-}
-
 type ReturnStatement struct {
 	Token       token.Token // 'return' token
 	ReturnValue Expression
@@ -115,6 +102,19 @@ func (e *ExpressionStatement) String() string {
 	return ""
 }
 
+type Identifier struct {
+	Token token.Token // token.IDENT
+	Value string
+}
+
+func (ls *Identifier) expressionNode() {}
+func (ls *Identifier) TokenLiteral() string {
+	return ls.Token.Literal
+}
+func (ls *Identifier) String() string {
+	return ls.Value
+}
+
 type IntegerLiteral struct {
 	Token token.Token
 	Value int64
@@ -129,6 +129,20 @@ func (i *IntegerLiteral) String() string {
 }
 
 func (i *IntegerLiteral) expressionNode() {}
+
+type Boolean struct {
+	Token token.Token
+	Value bool
+}
+
+func (Boolean) expressionNode() {}
+func (b *Boolean) TokenLiteral() string {
+	return b.Token.Literal
+}
+
+func (b *Boolean) String() string {
+	return b.Token.Literal
+}
 
 type PrefixExpression struct {
 	Token    token.Token // 前置トークン
