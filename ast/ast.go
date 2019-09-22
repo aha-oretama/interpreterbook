@@ -129,3 +129,49 @@ func (i *IntegerLiteral) String() string {
 }
 
 func (i *IntegerLiteral) expressionNode() {}
+
+type PrefixExpression struct {
+	Token    token.Token // 前置トークン
+	Operator string
+	Right    Expression
+}
+
+func (pre *PrefixExpression) expressionNode() {}
+func (pre *PrefixExpression) TokenLiteral() string {
+	return pre.Token.Literal
+}
+
+func (pre *PrefixExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("(")
+	out.WriteString(pre.Operator)
+	out.WriteString(pre.Right.String())
+	out.WriteString(")")
+
+	return out.String()
+}
+
+type InfixExpression struct {
+	Token    token.Token
+	Left     Expression
+	Operator string
+	Right    Expression
+}
+
+func (InfixExpression) expressionNode() {}
+func (in *InfixExpression) TokenLiteral() string {
+	return in.Token.Literal
+}
+
+func (in *InfixExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("(")
+	out.WriteString(in.Left.String())
+	out.WriteString(" " + in.Operator + " ")
+	out.WriteString(in.Right.String())
+	out.WriteString(")")
+
+	return out.String()
+}
