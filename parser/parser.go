@@ -80,8 +80,11 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 	if !p.execPeek(token.ASSIGN) {
 		return nil
 	}
-	// TODO: implement
-	for !p.curTokenIs(token.SEMICOLON) {
+
+	p.nextToken()
+	stmt.Value = p.parseExpression(LOWEST)
+
+	if p.peekTokenIs(token.SEMICOLON) {
 		p.nextToken()
 	}
 
@@ -93,7 +96,9 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 
 	p.nextToken()
 
-	for !p.curTokenIs(token.SEMICOLON) {
+	stmt.ReturnValue = p.parseExpression(LOWEST)
+
+	if p.peekTokenIs(token.SEMICOLON) {
 		p.nextToken()
 	}
 
