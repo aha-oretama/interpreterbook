@@ -276,6 +276,100 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
 
 }
 
+func TestIfExpression(t *testing.T) {
+	input := `if (x < y){ x }`
+
+	l := lexer.New(input)
+	parser := New(l)
+	program := parser.ParseProgram()
+	checkParseErrors(t, parser)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program has not enough statements. got=%d", len(program.Statements))
+	}
+	statement, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statement[0] is not ast.ExpressionStatement. got=%T", program.Statements[0])
+	}
+
+	ifExpression, ok := statement.Expression.(*ast.IfExpression)
+	if !ok {
+		t.Fatalf("exp not *ast.Boolean. got=%T", statement.Expression)
+	}
+
+	if !testInfixExpression(t, ifExpression.Condition, "x", "<", "y") {
+		return
+	}
+
+	if len(ifExpression.Consequence.Statements) != 1 {
+		t.Errorf("consequence i not 1 statements. got=%d", len(ifExpression.Consequence.Statements))
+	}
+
+	consequence, ok := ifExpression.Consequence.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("Statement[0] is not ast.ExpressionStatement. got=%T", ifExpression.Consequence.Statements[0])
+	}
+
+	if !testIdentifier(t, consequence.Expression, "x") {
+		return
+	}
+
+	if ifExpression.Alternative != nil {
+		t.Errorf("ifExpression.Alternative.Statements was not nil. got=%+v", ifExpression.Alternative)
+	}
+}
+
+func TestIfElseExpression(t *testing.T) {
+	input := `if (x < y){ x } else { y }`
+
+	l := lexer.New(input)
+	parser := New(l)
+	program := parser.ParseProgram()
+	checkParseErrors(t, parser)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program has not enough statements. got=%d", len(program.Statements))
+	}
+	statement, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statement[0] is not ast.ExpressionStatement. got=%T", program.Statements[0])
+	}
+
+	ifExpression, ok := statement.Expression.(*ast.IfExpression)
+	if !ok {
+		t.Fatalf("exp not *ast.Boolean. got=%T", statement.Expression)
+	}
+
+	if !testInfixExpression(t, ifExpression.Condition, "x", "<", "y") {
+		return
+	}
+
+	if len(ifExpression.Consequence.Statements) != 1 {
+		t.Errorf("consequence i not 1 statements. got=%d", len(ifExpression.Consequence.Statements))
+	}
+
+	consequence, ok := ifExpression.Consequence.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("Statement[0] is not ast.ExpressionStatement. got=%T", ifExpression.Consequence.Statements[0])
+	}
+
+	if !testIdentifier(t, consequence.Expression, "x") {
+		return
+	}
+
+	if len(ifExpression.Alternative.Statements) != 1 {
+		t.Errorf("consequence i not 1 statements. got=%d", len(ifExpression.Consequence.Statements))
+	}
+	alternative, ok := ifExpression.Alternative.Statements[0].(*ast.ExpressionStatement)
+
+	if !ok {
+		t.Fatalf("Statement[0] is not ast.ExpressionStatement. got=%T", ifExpression.Alternative.Statements[0])
+	}
+	if !testIdentifier(t, alternative.Expression, "y") {
+		return
+	}
+}
+
 func checkParseErrors(t *testing.T, p *Parser) {
 	errors := p.Errors()
 	if len(errors) == 0 {
