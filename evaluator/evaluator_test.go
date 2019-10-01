@@ -76,13 +76,7 @@ func TestEvalStringExpression(t *testing.T) {
 
 	for _, tt := range input {
 		evaluated := testEval(tt.input)
-		str, ok := evaluated.(*object.String)
-		if !ok {
-			t.Fatalf("object is not String. got=%T (%+v)", evaluated, evaluated)
-		}
-		if str.Value != tt.expected {
-			t.Errorf("object has wrong value. got=%q, want=%q", str.Value, tt.expected)
-		}
+		testStringObject(t, evaluated, tt.expected)
 	}
 }
 
@@ -180,16 +174,7 @@ if (10 > 1) {
 
 	for _, tt := range tests {
 		evaluated := testEval(tt.input)
-
-		errObj, ok := evaluated.(*object.Error)
-		if !ok {
-			t.Errorf("no error object returned. got=%T (%+v)", evaluated, evaluated)
-			continue
-		}
-
-		if errObj.Message != tt.expected {
-			t.Errorf("wrong error message. expected=%q, got=%q", tt.expected, errObj.Message)
-		}
+		testErrorObject(t, evaluated, tt.expected)
 	}
 }
 
@@ -269,6 +254,30 @@ applyFunc(2, 2, add);
 	}
 }
 
+func TestBuiltinFunctions(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`len("")`, 0},
+		{`len("four")`, 4},
+		{`len("hello world")`, 11},
+		{`let fnFour = fn() { "four" }; len(fnFour())`, 4},
+		{`len(1)`, "argument to `len` not supported, got INTEGER"},
+		{`len("one", "two")`, "wrong number of arguments. got=2, want=1"},
+	}
+	for _, test := range tests {
+		evaluated := testEval(test.input)
+
+		switch expected := test.expected.(type) {
+		case int:
+			testIntegerObject(t, evaluated, int64(expected))
+		case string:
+			testErrorObject(t, evaluated, expected)
+		}
+	}
+}
+
 func testEval(input string) object.Object {
 	l := lexer.New(input)
 	p := parser.New(l)
@@ -304,9 +313,36 @@ func testBooleanObject(t *testing.T, obj object.Object, expected bool) bool {
 	return true
 }
 
+func testStringObject(t *testing.T, obj object.Object, expected string) bool {
+	result, ok := obj.(*object.String)
+	if !ok {
+		t.Errorf("object is not String. got=%T (%+v)", obj, obj)
+		return false
+	}
+	if result.Value != expected {
+		t.Errorf("object has wrong value. got=%q, want=%q", result.Value, expected)
+		return false
+	}
+	return true
+}
+
 func testNullObject(t *testing.T, obj object.Object) bool {
 	if obj != NULL {
 		t.Errorf("object is not NULL. got=%T (%+v)", obj, obj)
+		return false
+	}
+	return true
+}
+
+func testErrorObject(t *testing.T, obj object.Object, expected string) bool {
+	errObj, ok := obj.(*object.Error)
+	if !ok {
+		t.Fatalf("no error object returned. got=%T (%+v)", obj, obj)
+		return false
+	}
+
+	if errObj.Message != expected {
+		t.Errorf("wrong error message. expected=%q, got=%q", expected, errObj.Message)
 		return false
 	}
 	return true
