@@ -65,6 +65,26 @@ func TestEvalBooleanExpression(t *testing.T) {
 	}
 }
 
+func TestEvalStringExpression(t *testing.T) {
+	input := []struct {
+		input    string
+		expected string
+	}{
+		{`"hello world"`, "hello world"},
+	}
+
+	for _, tt := range input {
+		evaluated := testEval(tt.input)
+		str, ok := evaluated.(*object.String)
+		if !ok {
+			t.Fatalf("object is not String. got=%T (%+v)", evaluated, evaluated)
+		}
+		if str.Value != tt.expected {
+			t.Errorf("object has wrong value. got=%q, want=%q", str.Value, tt.expected)
+		}
+	}
+}
+
 func TestBangOperator(t *testing.T) {
 	input := []struct {
 		input    string
