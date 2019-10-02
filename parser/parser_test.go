@@ -591,9 +591,9 @@ func TestParsingArrayLiterals(t *testing.T) {
 		t.Fatalf("program.Statement[0] is not ast.ExpressionStatement. got=%T", program.Statements[0])
 	}
 
-	array, ok := statement.Expression.(*ast.ArrayLieral)
+	array, ok := statement.Expression.(*ast.ArrayLiteral)
 	if !ok {
-		t.Fatalf("statement.Expression is not ast.ArrayLieral. got=%T", statement.Expression)
+		t.Fatalf("statement.Expression is not ast.ArrayLiteral. got=%T", statement.Expression)
 	}
 	if len(array.Elements) != 3 {
 		t.Fatalf("wrong length of arguments. got=%d", len(array.Elements))

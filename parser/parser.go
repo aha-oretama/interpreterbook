@@ -275,7 +275,7 @@ func (p *Parser) parseFunctionalLiteral() ast.Expression {
 }
 
 func (p *Parser) parseArrayLiteral() ast.Expression {
-	array := &ast.ArrayLieral{Token: p.curToken}
+	array := &ast.ArrayLiteral{Token: p.curToken}
 	array.Elements = p.parseExpressionList(token.RBRACKET)
 
 	return array
