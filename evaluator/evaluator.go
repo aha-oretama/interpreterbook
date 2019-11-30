@@ -97,6 +97,8 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 			return elements[0]
 		}
 		return &object.Array{Elements: elements}
+	case *ast.HashLiteral:
+		return evalHashLiteral(node, env)
 	}
 
 	return nil
@@ -291,6 +293,33 @@ func applyFunction(fn object.Object, args []object.Object) object.Object {
 	default:
 		return newError("not a function: %s", fn.Type())
 	}
+}
+
+func evalHashLiteral(node *ast.HashLiteral, env *object.Environment) object.Object {
+	pairs := make(map[object.HashKey]object.HashPair)
+	for keyNode, valueNode := range node.Pairs {
+		key := Eval(keyNode, env)
+		if isError(key) {
+			return key
+		}
+
+		hashKey, ok := key.(object.Hashable)
+		if !ok {
+			return newError("unnusable as hash key: %s", key.Type())
+		}
+
+		value := Eval(valueNode, env)
+		if isError(value) {
+			return value
+		}
+
+		pairs[hashKey.HashKey()] = object.HashPair{
+			Key:   key,
+			Value: value,
+		}
+	}
+
+	return &object.Hash{Pairs: pairs}
 }
 
 func extendFunctionEnv(fn *object.Function, args []object.Object) *object.Environment {
